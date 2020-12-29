@@ -7,31 +7,36 @@ package main
 
 import (
     "fmt"
-    "os"    
+    "os"
+    "strconv"
     "time"
 
     stomp "github.com/go-stomp/stomp"
 )
 
 func main() {
+    var counter int
+
     fmt.Println("MOCK-PRODUCER: initializing data producing...")
     fmt.Println("MOCK-PRODUCER: version 1.0.0")
 
     time.Sleep(30 * time.Second)
 
     // continue even some error occurs
+    counter = 0
     for {
-        listEvents()
-        time.Sleep(10 * time.Second)
+        listEvents(counter)
+        time.Sleep(time.Second)
+	counter++
     }
 }
 
-func listEvents() {
+func listEvents(eventid int){
     var data string
     var conn *stomp.Conn
     var err error
 
-    data = getDataForLog()
+    data = getDataForLog(eventid)
 
     activemqHost := "mock-queue"
     if os.Getenv("QUEUE_HOST") != "" {
@@ -62,7 +67,7 @@ func listEvents() {
     fmt.Println(msg)
 }
 
-func getDataForLog() string {
+func getDataForLog(eventid int) string {
     var data string
 
     now := time.Now()
@@ -76,7 +81,7 @@ func getDataForLog() string {
         "\"pod\":\"mock\"," +
         "\"pod_ip\":\"mock\"," +
         "\"pod_ip_status\":\"mock\"," +
-        "\"short_message\":\"mock/mock:mock\"," +
+        "\"short_message\":\"mock/mock:" + strconv.Itoa(eventid) + "\"," +
         "\"full_message\":\"mock/mock:mock:mock:" + now.String() + "\"," +
         "\"timestamp\":\"" +     now.String() + "\"," +
         "\"logtype\": \"mock\"}";
